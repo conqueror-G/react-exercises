@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import SearchBox from "./Components/SearchBox/SearchBox";
-import CardList from "./Components/CardList/CardList";
-import "./Monsters.scss";
+import React, { useState, useEffect } from 'react';
+import SearchBox from './Components/SearchBox/SearchBox';
+import CardList from './Components/CardList/CardList';
+import './Monsters.scss';
+import axios from 'axios';
 
 /**********************************************************
   API 주소: https://jsonplaceholder.typicode.com/users
@@ -21,18 +22,45 @@ import "./Monsters.scss";
 ***********************************************************/
 
 function Monsters() {
+  // api state
   const [monsters, setMonsters] = useState([]);
-  const [userInput, setUserInput] = useState("");
 
-  // 데이터 로딩
+  // input state
+  const [userInput, setUserInput] = useState('');
 
-  // SearchBox 에 props로 넘겨줄 handleChange 메소드 정의
+  // loading state
+  const [loading, setLoading] = useState(true);
+
+  const handleChange = e => {
+    const { value } = e.target;
+    setUserInput(value);
+  };
+
+  const requestToServer = async () => {
+    try {
+      const response = await axios.get(
+        'https://jsonplaceholder.typicode.com/users'
+      );
+      setMonsters(response.data);
+      setLoading(false);
+    } catch {
+      alert('Not a data');
+    }
+  };
+
+  useEffect(() => {
+    requestToServer();
+  }, []);
+
+  const sortedMonsters = monsters.filter(monster =>
+    monster.name.toLowerCase().includes(userInput)
+  );
 
   return (
-    <div className="monsters">
+    <div className='monsters'>
       <h1>컴포넌트 재사용 연습!</h1>
-      {/* <SearchBox handleChange=정의한메소드 /> */}
-      {/* <CardList monsters=몬스터리스트 /> */}
+      <SearchBox handleChange={handleChange} />
+      <CardList monsters={sortedMonsters} loading={loading} />
     </div>
   );
 }
